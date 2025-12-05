@@ -8,100 +8,124 @@
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
 
-        const labels = {{ labels | tojson }};
-        const data = {{ values | tojson }};
+        const labels = {{ labels | tojson
+    }};
+    const data = {{ values | tojson }};
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Saldo USD',
-                        data: data,
-                        borderColor: '#2563eb',
-                        backgroundColor: 'rgba(37, 99, 235, 0.08)',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        tension: 0.25,
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Saldo USD',
+                    data: data,
+                    // borderColor: '#2563eb', // Removed in favor of segment
+                    // backgroundColor: 'rgba(37, 99, 235, 0.08)', // Removed
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.25,
+                    segment: {
+                        borderColor: ctx => {
+                            const label = labels[ctx.p0DataIndex];
+                            // Parse date safely
+                            const date = new Date(label);
+                            const splitDate = new Date('2025-12-05T00:00:00');
+
+                            if (!isNaN(date) && date >= splitDate) {
+                                return '#10b981'; // Green for new version
+                            }
+                            return '#2563eb'; // Blue for old version
+                        },
+                        backgroundColor: ctx => {
+                            const label = labels[ctx.p0DataIndex];
+                            const date = new Date(label);
+                            const splitDate = new Date('2025-12-05T00:00:00');
+
+                            if (!isNaN(date) && date >= splitDate) {
+                                return 'rgba(16, 185, 129, 0.08)';
+                            }
+                            return 'rgba(37, 99, 235, 0.08)';
+                        }
                     },
-                    {
-                        label: 'Valore iniziale',
-                        data: Array(data.length).fill(data.length ? data[0] : null),
-                        borderColor: '#9ca3af',
-                        borderDash: [5, 4],
-                        borderWidth: 1,
-                        pointRadius: 0,
-                        tension: 0,
-                    },
-                ],
+                },
+                {
+                    label: 'Valore iniziale',
+                    data: Array(data.length).fill(data.length ? data[0] : null),
+                    borderColor: '#9ca3af',
+                    borderDash: [5, 4],
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    tension: 0,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 0,
+                    right: 10,
+                    top: 5,
+                    bottom: 0,
+                },
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                    padding: {
-                        left: 0,
-                        right: 10,
-                        top: 5,
-                        bottom: 0,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#374151',
+                        font: { size: 11 },
                     },
                 },
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            color: '#374151',
-                            font: { size: 11 },
-                        },
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                const value = context.parsed.y;
-                                return 'Saldo: $' + value.toFixed(2);
-                            },
-                        },
-                    },
-                },
-                scales: {
-                    x: {
-                        ticks: {
-                            color: '#4b5563',
-                            maxTicksLimit: 6,
-                            callback: function (value, index, ticks) {
-                                const raw = labels[index];
-                                const d = new Date(raw);
-                                if (isNaN(d.getTime())) return raw;
-                                return d.toLocaleString('it-IT', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                });
-                            },
-                        },
-                        grid: { display: false },
-                    },
-                    y: {
-                        ticks: {
-                            color: '#4b5563',
-                            callback: function (value) {
-                                return '$' + value;
-                            },
-                        },
-                        grid: {
-                            color: 'rgba(148, 163, 184, 0.3)',
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const value = context.parsed.y;
+                            return 'Saldo: $' + value.toFixed(2);
                         },
                     },
                 },
             },
-        });
-    })();
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#4b5563',
+                        maxTicksLimit: 6,
+                        callback: function (value, index, ticks) {
+                            const raw = labels[index];
+                            const d = new Date(raw);
+                            if (isNaN(d.getTime())) return raw;
+                            return d.toLocaleString('it-IT', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                            });
+                        },
+                    },
+                    grid: { display: false },
+                },
+                y: {
+                    ticks: {
+                        color: '#4b5563',
+                        callback: function (value) {
+                            return '$' + value;
+                        },
+                    },
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.3)',
+                    },
+                },
+            },
+        },
+    });
+    }) ();
 </script>
 {% else %}
 <p>Nessun dato di saldo trovato.</p>

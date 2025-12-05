@@ -1,0 +1,147 @@
+{% if current_positions or archive_positions %}
+
+<!-- SEZIONE ATTUALE -->
+<div style="margin-bottom: 2rem;">
+    <h4 style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600;">
+        Statistiche Attuali (v0.0.2)
+    </h4>
+    <div
+        style="padding: 1rem; background: #f8fafc; border-radius: 0.75rem; border: 1px solid #e2e8f0; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em;">WIN
+                RATE</span>
+            <span style="font-size: 1rem; font-weight: 800; color: var(--text-main);">{{ current_stats.win_rate
+                }}%</span>
+        </div>
+
+        <div
+            style="display: flex; height: 8px; border-radius: 999px; overflow: hidden; background: #e2e8f0; margin-bottom: 0.75rem;">
+            <div style="width: {{ current_stats.win_rate }}%; background: #10b981; transition: width 0.5s ease;"></div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 500;">
+            <div style="display: flex; align-items: center; gap: 0.35rem;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+                <span style="color: #166534;">{{ current_stats.wins }} Wins</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.35rem;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></span>
+                <span style="color: #991b1b;">{{ current_stats.losses }} Losses</span>
+            </div>
+        </div>
+    </div>
+
+    {% if current_positions %}
+    <div class="open-positions-row">
+        {% for pos in current_positions %}
+        <div class="position-card"
+            style="border-left: 4px solid {% if pos.pnl_usd >= 0 %}#10b981{% else %}#ef4444{% endif %};">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <strong style="font-size:1rem;">{{ pos.symbol }}</strong>
+                <span class="tag {% if pos.side|lower == 'long' %}tag-long{% else %}tag-short{% endif %}">
+                    {{ pos.side|upper }}
+                </span>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem; font-size:0.85rem;">
+                <div>
+                    <small>Entry</small><br>
+                    ${{ "%.2f"|format(pos.entry_price) }}
+                </div>
+                <div>
+                    <small>Exit</small><br>
+                    ${{ "%.2f"|format(pos.exit_price) }}
+                </div>
+            </div>
+
+            <div
+                style="margin-top:0.75rem; padding-top:0.5rem; border-top:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center;">
+                <small>{{ pos.closed_at.strftime('%d/%m %H:%M') }}</small>
+                <span class="{% if pos.pnl_usd >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}"
+                    style="font-size:1rem;">
+                    {{ "+" if pos.pnl_usd >= 0 else "" }}{{ "%.2f"|format(pos.pnl_usd) }} $
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-muted); font-style:italic; font-size: 0.9rem;">Nessuna posizione chiusa per questa
+        versione.</p>
+    {% endif %}
+</div>
+
+<!-- SEZIONE ARCHIVIO -->
+{% if archive_stats.total > 0 %}
+<details>
+    <summary
+        style="font-size: 0.8rem; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; font-weight: 500;">
+        Vedi Storico (v0.0.1)
+    </summary>
+    <div
+        style="padding: 1rem; background: #f1f5f9; border-radius: 0.75rem; border: 1px solid #e2e8f0; margin-top: 0.5rem; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em;">WIN
+                RATE</span>
+            <span style="font-size: 1rem; font-weight: 800; color: var(--text-main);">{{ archive_stats.win_rate
+                }}%</span>
+        </div>
+
+        <div
+            style="display: flex; height: 8px; border-radius: 999px; overflow: hidden; background: #e2e8f0; margin-bottom: 0.75rem;">
+            <div style="width: {{ archive_stats.win_rate }}%; background: #94a3b8; transition: width 0.5s ease;"></div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 500;">
+            <div style="display: flex; align-items: center; gap: 0.35rem;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+                <span style="color: #166534;">{{ archive_stats.wins }} Wins</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.35rem;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></span>
+                <span style="color: #991b1b;">{{ archive_stats.losses }} Losses</span>
+            </div>
+        </div>
+    </div>
+
+    {% if archive_positions %}
+    <div class="open-positions-row" style="opacity: 0.85;">
+        {% for pos in archive_positions %}
+        <div class="position-card"
+            style="border-left: 4px solid {% if pos.pnl_usd >= 0 %}#10b981{% else %}#ef4444{% endif %}; background: #f1f5f9;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <strong style="font-size:1rem;">{{ pos.symbol }}</strong>
+                <span class="tag {% if pos.side|lower == 'long' %}tag-long{% else %}tag-short{% endif %}">
+                    {{ pos.side|upper }}
+                </span>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem; font-size:0.85rem;">
+                <div>
+                    <small>Entry</small><br>
+                    ${{ "%.2f"|format(pos.entry_price) }}
+                </div>
+                <div>
+                    <small>Exit</small><br>
+                    ${{ "%.2f"|format(pos.exit_price) }}
+                </div>
+            </div>
+
+            <div
+                style="margin-top:0.75rem; padding-top:0.5rem; border-top:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center;">
+                <small>{{ pos.closed_at.strftime('%d/%m %H:%M') }}</small>
+                <span class="{% if pos.pnl_usd >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}"
+                    style="font-size:1rem;">
+                    {{ "+" if pos.pnl_usd >= 0 else "" }}{{ "%.2f"|format(pos.pnl_usd) }} $
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</details>
+{% endif %}
+
+{% else %}
+<p style="color:var(--text-muted); font-style:italic;">Nessuna posizione chiusa rilevata di recente.</p>
+{% endif %}

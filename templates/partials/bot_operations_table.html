@@ -13,7 +13,8 @@
         <div class="operation-tags">
             <span class="tag">ID #{{ op.id }}</span>
             {% if op.direction %}
-            <span class="tag {% if op.direction|lower == 'long' %}tag-long{% elif op.direction|lower == 'short' %}tag-short{% endif %}">
+            <span
+                class="tag {% if op.direction|lower == 'long' %}tag-long{% elif op.direction|lower == 'short' %}tag-short{% endif %}">
                 {{ op.direction|capitalize }}
             </span>
             {% endif %}
@@ -25,7 +26,46 @@
             {% endif %}
         </div>
 
-        {% set reason = op.raw_payload.get('reason') or op.raw_payload.get('motivation') or op.raw_payload.get('comment') %}
+        <!-- Technical Context Section -->
+        {% if op.current_price or op.rsi_7 or op.macd or op.predicted_price %}
+        <div
+            style="margin-top: 0.75rem; padding: 0.6rem; background: #f1f5f9; border-radius: 0.5rem; font-size: 0.8rem; border: 1px solid #e2e8f0;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+
+                <!-- Indicators -->
+                <div>
+                    <div style="font-weight: 600; color: #475569; margin-bottom: 0.25rem;">Market Data</div>
+                    {% if op.current_price %}
+                    <div>Price: <strong>${{ "%.2f"|format(op.current_price) }}</strong></div>
+                    {% endif %}
+                    {% if op.rsi_7 %}
+                    <div>RSI (7): <span
+                            style="color: {% if op.rsi_7 > 70 %}#ef4444{% elif op.rsi_7 < 30 %}#10b981{% else %}inherit{% endif %}">{{
+                            "%.1f"|format(op.rsi_7) }}</span></div>
+                    {% endif %}
+                    {% if op.macd %}
+                    <div>MACD: {{ "%.4f"|format(op.macd) }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Forecast -->
+                {% if op.predicted_price %}
+                <div>
+                    <div style="font-weight: 600; color: #475569; margin-bottom: 0.25rem;">AI Forecast</div>
+                    <div>Target: <strong>${{ "%.2f"|format(op.predicted_price) }}</strong></div>
+                    {% if op.forecast_lower and op.forecast_upper %}
+                    <div style="font-size: 0.75rem; color: #64748b;">
+                        Range: ${{ "%.0f"|format(op.forecast_lower) }} - ${{ "%.0f"|format(op.forecast_upper) }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% set reason = op.raw_payload.get('reason') or op.raw_payload.get('motivation') or
+        op.raw_payload.get('comment') %}
         {% if reason %}
         <p style="margin-top:0.5rem; margin-bottom:0.5rem;">
             {{ reason | truncate(180, True, '…') }}

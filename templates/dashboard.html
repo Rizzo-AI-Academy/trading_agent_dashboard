@@ -6,10 +6,24 @@
 <section class="layout-main-row">
     <!-- Colonna sinistra: equity curve + posizioni aperte -->
     <div style="display:flex; flex-direction:column; gap:1rem;">
+
+        <!-- PnL Stats Infographic -->
+        <article class="card">
+            <div style="margin-bottom:0.5rem;">
+                <h2><span class="accent-dot"></span> Performance Overview</h2>
+                <p class="card-subtitle">Riepilogo delle performance dal lancio del bot.</p>
+            </div>
+            <div id="pnl-stats-panel" hx-get="/ui/pnl-stats" hx-trigger="load">
+                <!-- Stats caricate via HTMX -->
+                <div aria-busy="true">Caricamento statistiche...</div>
+            </div>
+        </article>
+
         <article class="card">
             <div style="margin-bottom:0.5rem;">
                 <h2><span class="accent-dot"></span> Equity curve</h2>
-                <p class="card-subtitle">Valore del conto nel tempo, dalla prima osservazione all'ultima disponibile.</p>
+                <p class="card-subtitle">Valore del conto nel tempo, dalla prima osservazione all'ultima disponibile.
+                </p>
             </div>
             <div id="balance-panel" hx-get="/ui/balance" hx-trigger="load">
                 <!-- Grafico saldo caricato via HTMX -->
@@ -25,13 +39,33 @@
                 <!-- Posizioni aperte caricate via HTMX come card orizzontali -->
             </div>
         </article>
+
+        <article class="card">
+            <div style="margin-bottom:0.5rem;">
+                <h2><span class="accent-dot" style="background:#64748b;"></span> Posizioni chiuse (Stimate)</h2>
+                <p class="card-subtitle">Ultime posizioni chiuse rilevate dal confronto degli snapshot.</p>
+            </div>
+            <div id="closed-positions-container">
+                <button type="button" class="contrast outline" hx-get="/ui/closed-positions"
+                    hx-target="#closed-positions-container" hx-swap="innerHTML"
+                    style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; padding: 0.75rem; margin-top: 0.5rem; cursor: pointer;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Carica storico posizioni chiuse
+                </button>
+            </div>
+        </article>
     </div>
 
     <!-- Colonna destra: ultime operazioni dell'agente -->
     <aside class="card">
         <div style="margin-bottom:0.5rem;">
             <h2><span class="accent-dot"></span> Operazioni recenti</h2>
-            <p class="card-subtitle">Ultime 50 operazioni loggate dall'agente, con ragionamento e prompt.</p>
+            <p class="card-subtitle">Ultime 10 operazioni loggate dall'agente, con ragionamento e prompt.</p>
         </div>
         <div id="bot-operations-column" class="operations-column" hx-get="/ui/bot-operations" hx-trigger="load">
             <!-- Operazioni caricate via HTMX come box verticali -->

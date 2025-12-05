@@ -1,28 +1,41 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Trading Agent Dashboard{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://unpkg.com/htmx.org@2.0.2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <style>
         :root {
-            --bg-body: #f3f4f6;
+            --bg-body: #f8fafc;
             --bg-card: #ffffff;
-            --border-subtle: #e5e7eb;
-            --accent: #2563eb;
-            --accent-soft: rgba(37, 99, 235, 0.08);
-            --text-main: #111827;
-            --text-muted: #6b7280;
+            --border-subtle: #e2e8f0;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --accent-soft: rgba(59, 130, 246, 0.1);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
 
         body {
-            padding: 1.5rem;
-            background: radial-gradient(circle at top left, #e5e7eb 0, #f9fafb 40%, #f3f4f6 100%);
+            padding: 2rem;
+            background: var(--bg-body);
             color: var(--text-main);
+            font-family: 'Inter', sans-serif;
             font-size: 15px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
         main.container {
@@ -34,6 +47,7 @@
             font-weight: 700;
             letter-spacing: 0.02em;
             color: #0f172a;
+            margin-bottom: 0;
         }
 
         header p {
@@ -43,7 +57,7 @@
         }
 
         .header-strip {
-            margin-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .layout-root {
@@ -60,11 +74,16 @@
         }
 
         .card {
-            padding: 1rem 1.1rem;
-            border-radius: 0.9rem;
+            padding: 1.5rem;
+            border-radius: 1rem;
             border: 1px solid var(--border-subtle);
             background: var(--bg-card);
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
         }
 
         .card h2 {
@@ -96,22 +115,49 @@
         }
 
         .refresh-btn-global {
-            border-radius: 999px;
-            border: 1px solid #d1d5db;
-            padding: 0.4rem 0.95rem;
-            font-size: 0.85rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border-subtle);
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
             background: #ffffff;
-            color: #111827;
+            color: var(--text-main);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
         }
 
         .refresh-btn-global:hover {
             border-color: var(--accent);
             color: var(--accent);
             background: var(--accent-soft);
+            transform: translateY(-1px);
+        }
+
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.8rem;
+            border-radius: 0.5rem;
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .social-btn:hover {
+            background: #f8fafc;
+            color: var(--accent);
+            border-color: var(--accent);
+            text-decoration: none;
+            transform: translateY(-1px);
         }
 
         .open-positions-row {
@@ -227,7 +273,8 @@
             font-size: 0.9rem;
         }
 
-        th, td {
+        th,
+        td {
             white-space: nowrap;
         }
 
@@ -239,9 +286,72 @@
             text-decoration: underline;
         }
 
+        /* Stats Grid Styles */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .text-green {
+            color: var(--success);
+        }
+
+        .text-red {
+            color: var(--danger);
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        /* Footer Styles */
+        .app-footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-subtle);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .version-tag {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.2rem 0.6rem;
+            background: var(--accent-soft);
+            color: var(--accent);
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
         @media (max-width: 900px) {
             body {
-                padding: 0.9rem;
+                padding: 1rem;
             }
 
             .layout-main-row {
@@ -254,39 +364,81 @@
         }
     </style>
 </head>
+
 <body>
     <main class="container layout-root">
         <header>
             <div class="header-strip">
-                <div>
-                    <h1>Trading Agent Dashboard</h1>
-                    <p>
-                        Progetto didattico a cura di Simone Rizzo della serie YouTube
-                        <a href="https://www.youtube.com/watch?v=Vrl2Ar_SvSo&list=PLYtHoWz0tONvqawl66HkjgLkEy7xi_6Yp" target="_blank" rel="noopener noreferrer">
-                            "Creo il mio AI trading agent"
-                        </a>.
-                    </p>
-                    <p>
-                        Tutto il codice dell'agente è disponibile all'interno della
-                        <a href="http://rizzoaiacademy.com/" target="_blank" rel="noopener noreferrer">Rizzo AI Academy</a>.
-                        <br>
-                        Per aggiornamenti costanti puoi seguire
-                        <a href="https://www.instagram.com/simorizzo_ai/" target="_blank" rel="noopener noreferrer">@simorizzo_ai su Instagram</a>.
-                    </p>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                    <!-- Left Column: Title, Subtitle, Description, Socials -->
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 700px;">
+                        <div>
+                            <h1>Trading Agent Dashboard</h1>
+                            <p
+                                style="font-size: 1.1rem; color: var(--text-muted); font-weight: 400; margin-bottom: 0.5rem;">
+                                by <span style="color: var(--accent); font-weight: 600;">Simone Rizzo</span>
+                            </p>
+                            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">
+                                Progetto didattico a cura della serie YouTube "Creo il mio AI trading
+                                agent".<br>
+                                Tutto il codice dell'agente è disponibile all'interno della Rizzo AI Academy.<br>
+                                Per aggiornamenti costanti puoi seguire su Instagram 👇.
+                            </p>
+                        </div>
+
+                        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                            <a href="https://www.youtube.com/watch?v=Vrl2Ar_SvSo&list=PLYtHoWz0tONvqawl66HkjgLkEy7xi_6Yp"
+                                target="_blank" class="social-btn" aria-label="YouTube Series">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path
+                                        d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17">
+                                    </path>
+                                    <path d="m10 15 5-3-5-3z"></path>
+                                </svg>
+                                YouTube
+                            </a>
+                            <a href="http://rizzoaiacademy.com/" target="_blank" class="social-btn"
+                                aria-label="Rizzo AI Academy">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                                </svg>
+                                Academy
+                            </a>
+                            <a href="https://www.instagram.com/simorizzo_ai/" target="_blank" class="social-btn"
+                                aria-label="Instagram">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+                                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+                                </svg>
+                                Instagram
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Refresh Button -->
+                    <div>
+                        <button id="refresh-all" class="refresh-btn-global" onclick="window.location.reload()">
+                            🔄 Aggiorna tutto
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div class="refresh-row">
-                <button
-                    id="refresh-all"
-                    class="refresh-btn-global"
-                    onclick="window.location.reload()"
-                >
-                    🔄 Aggiorna tutto
-                </button>
             </div>
         </header>
 
         {% block content %}{% endblock %}
+
+        <footer class="app-footer">
+            <p>&copy; 2025 Trading Agent Dashboard. All rights reserved.</p>
+            <span class="version-tag">Versione 0.0.2</span>
+        </footer>
     </main>
 </body>
+
 </html>

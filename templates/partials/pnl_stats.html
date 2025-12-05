@@ -1,0 +1,70 @@
+{% if has_data %}
+<div style="margin-bottom: 1.5rem;">
+    <h3 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.75rem; font-weight: 600;">
+        Performance Attuale (v0.0.2) <span style="font-weight: 400; font-size: 0.8rem;">(dal 05/12/2025)</span>
+    </h3>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Saldo Attuale</div>
+            <div class="stat-value">${{ "%.2f"|format(current_stats.current_balance) }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">PnL Totale ($)</div>
+            <div class="stat-value {% if current_stats.pnl_usd >= 0 %}text-green{% else %}text-red{% endif %}">
+                {{ "+" if current_stats.pnl_usd >= 0 else "" }}{{ "%.2f"|format(current_stats.pnl_usd) }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">PnL Totale (%)</div>
+            <div class="stat-value {% if current_stats.pnl_percent >= 0 %}text-green{% else %}text-red{% endif %}">
+                {{ "+" if current_stats.pnl_percent >= 0 else "" }}{{ "%.2f"|format(current_stats.pnl_percent) }}%
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Saldo Iniziale</div>
+            <div class="stat-value text-muted">${{ "%.2f"|format(current_stats.initial_balance) }}</div>
+        </div>
+    </div>
+</div>
+
+{% if archive_stats %}
+<details>
+    <summary style="font-size: 0.85rem; font-weight: 500; margin-bottom: 0.5rem;">Storico Performance (v0.0.1)</summary>
+    <div class="stats-grid"
+        style="margin-top: 0.5rem; opacity: 0.75; transform: scale(0.98); transform-origin: top left;">
+        <div class="stat-card">
+            <div class="stat-label">Saldo Finale</div>
+            <div class="stat-value">${{ "%.2f"|format(archive_stats.current_balance) }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">PnL Totale ($)</div>
+            <div class="stat-value {% if archive_stats.pnl_usd >= 0 %}text-green{% else %}text-red{% endif %}">
+                {{ "+" if archive_stats.pnl_usd >= 0 else "" }}{{ "%.2f"|format(archive_stats.pnl_usd) }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">PnL Totale (%)</div>
+            <div class="stat-value {% if archive_stats.pnl_percent >= 0 %}text-green{% else %}text-red{% endif %}">
+                {{ "+" if archive_stats.pnl_percent >= 0 else "" }}{{ "%.2f"|format(archive_stats.pnl_percent) }}%
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Saldo Iniziale</div>
+            <div class="stat-value text-muted">${{ "%.2f"|format(archive_stats.initial_balance) }}</div>
+        </div>
+    </div>
+</details>
+{% endif %}
+
+{% else %}
+<div class="stat-card">
+    <div class="stat-label">Dati non disponibili</div>
+    <div class="stat-value">-</div>
+</div>
+{% endif %}
